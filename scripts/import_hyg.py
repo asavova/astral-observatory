@@ -32,8 +32,12 @@ def convert(source: Path, target: Path) -> tuple[int, int]:
             ra, dec = float(row["ra"]), float(row["dec"])
             mag = float(row["mag"]) if row["mag"] else 99.0
             ci = float(row["ci"]) if row["ci"] else 0.0
-            if not all(map(math.isfinite, (ra, dec, mag, ci))):
-                raise ValueError(f"Non-finite data at source row {total}")
+            if not math.isfinite(mag):
+                mag = 99.0
+            if not math.isfinite(ci):
+                ci = 0.0
+            if not all(map(math.isfinite, (ra, dec))):
+                raise ValueError(f"Non-finite coordinates at source row {total}")
             if not (0 <= ra <= 24 and -90 <= dec <= 90):
                 raise ValueError(f"Invalid coordinates at source row {total}")
             identifier = row["id"] or str(total)
