@@ -1,0 +1,15 @@
+# Demo subset only; J2000 equatorial positions; approximate magnitudes.
+# This file is NOT the full Bright Star Catalogue. Coordinates are approximate factual values.
+name,ra_hours,dec_degrees,magnitude
+Sirius,6.7522,-16.7161,-1.46
+Arcturus,14.2610,19.1824,-0.05
+Vega,18.6156,38.7837,0.03
+Capella,5.2782,45.9979,0.08
+Rigel,5.2423,-8.2016,0.13
+Procyon,7.6550,5.2250,0.34
+Betelgeuse,5.9194,7.4070,0.42
+Altair,19.8463,8.8683,0.77
+Aldebaran,4.5987,16.5093,0.85
+Antares,16.4901,-26.4320,1.06
+Deneb,20.6905,45.2803,1.25
+Polaris,2.5303,89.2641,1.98
