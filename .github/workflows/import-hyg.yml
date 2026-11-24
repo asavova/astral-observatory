@@ -1,0 +1,44 @@
+name: Import HYG catalogue
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/import-hyg.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Download official HYG v4.1 source
+        run: |
+          python3 - <<'PY'
+          from urllib.request import urlopen
+          url = "https://raw.githubusercontent.com/astronexus/HYG-Database/3bf37f4b2d5460e1278286320d1d62fab9b493c1/hyg/CURRENT/hygdata_v41.csv"
+          with urlopen(url, timeout=90) as response, open("/tmp/hygdata_v41.csv", "wb") as out:
+              while chunk := response.read(1024 * 1024):
+                  out.write(chunk)
+          PY
+          test "$(git hash-object /tmp/hygdata_v41.csv)" = "ba2dec4eb0f6768914c7fc1051258100214ddf84"
+      - name: Produce offline catalogue
+        run: |
+          python3 scripts/import_hyg.py /tmp/hygdata_v41.csv data/hyg-full-v41.tsv
+          bash scripts/test.sh
+      - name: Commit generated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/hyg-full-v41.tsv
+          if ! git diff --cached --quiet; then
+            git commit -m "data: bundle full HYG v4.1 stars for offline use"
+            git push
+          fi
