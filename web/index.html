@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Astral Observatory</title>
+  <style>
+    :root { color-scheme: dark; font: 16px system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #090f22; color: #eaf1ff; }
+    main { max-width: 960px; margin: 30px auto; padding: 0 20px; }
+    h1 { letter-spacing: -.04em; margin-bottom: 6px; }
+    p { color: #aebdd5; }
+    form { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 22px 0; }
+    label { display: grid; gap: 5px; color: #aebdd5; font-size: 13px; }
+    input, button { border: 1px solid #334667; border-radius: 8px; padding: 10px; background: #131f36; color: white; }
+    input { width: 145px; }
+    input[type=datetime-local] { width: 205px; }
+    button { background: #477af7; border: 0; font-weight: 700; cursor: pointer; }
+    canvas { display: block; width: 100%; max-width: 680px; aspect-ratio: 1; margin: 20px auto; }
+    #status { text-align: center; min-height: 1.4em; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Astral Observatory</h1>
+    <p>Offline prototype · approximate J2000 star positions · north-up sky map</p>
+    <form id="controls">
+      <label>Latitude (°)<input id="lat" type="number" min="-90" max="90" step="any" value="42.6977" required></label>
+      <label>Longitude (° E)<input id="lon" type="number" min="-180" max="180" step="any" value="23.3219" required></label>
+      <label>Local date and time<input id="time" type="datetime-local" required></label>
+      <button type="submit">Show sky</button>
+    </form>
+    <canvas id="sky" width="680" height="680" aria-label="Visible bright stars on a circular sky chart"></canvas>
+    <p id="status" role="status"></p>
+    <p><small>Only 12 sample stars are loaded. Positions are approximations, not precision telescope pointing.</small></p>
+  </main>
+  <script>
+    const timeInput = document.querySelector('#time');
+    const now = new Date();
+    const localNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    timeInput.value = localNow.toISOString().slice(0,16);
+    const canvas = document.querySelector('#sky');
+    const ctx = canvas.getContext('2d');
+    const center = 340, radius = 280;
+    function redraw(stars) {
+      ctx.clearRect(0, 0, 680, 680);
+      ctx.fillStyle = '#0c1730'; ctx.beginPath(); ctx.arc(center, center, radius, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#506488'; ctx.lineWidth = 1;
+      for (const altitude of [0,30,60]) {
+        ctx.beginPath(); ctx.arc(center,center,radius*(90-altitude)/90,0,Math.PI*2); ctx.stroke();
+      }
+      ctx.beginPath(); ctx.moveTo(center,center-radius); ctx.lineTo(center,center+radius);
+      ctx.moveTo(center-radius,center); ctx.lineTo(center+radius,center); ctx.stroke();
+      ctx.font = '16px system-ui'; ctx.textAlign = 'center'; ctx.fillStyle = '#b7c9ee';
+      for (const [name,x,y] of [['N',center,center-radius-16],['S',center,center+radius+24],['E',center+radius+18,center+5],['W',center-radius-18,center+5]]) ctx.fillText(name,x,y);
+      for (const star of stars) {
+        const distance = radius * (90 - star.alt)/90;
+        const angle = star.az * Math.PI/180;
+        const x = center + distance * Math.sin(angle), y = center - distance * Math.cos(angle);
+        const size = Math.max(2, 5 - star.mag * 1.3);
+        ctx.beginPath(); ctx.arc(x,y,size,0,Math.PI*2); ctx.fillStyle='#fbf4da'; ctx.fill();
+        ctx.font='12px system-ui'; ctx.textAlign='left'; ctx.fillStyle='#d0dcf5'; ctx.fillText(star.name,x+9,y-7);
+      }
+    }
+    async function update() {
+      const status = document.querySelector('#status');
+      try {
+        status.textContent = 'Calculating…';
+        const params = new URLSearchParams({lat: document.querySelector('#lat').value, lon:document.querySelector('#lon').value, time:new Date(timeInput.value).toISOString()});
+        const response = await fetch('/api/stars?' + params);
+        if (!response.ok) throw new Error(await response.text());
+        const data = await response.json();
+        redraw(data.stars);
+        status.textContent = `${data.stars.length} of 12 sample stars are above the horizon.`;
+      } catch (error) { status.textContent = `Could not calculate sky: ${error.message}`; }
+    }
+    document.querySelector('#controls').addEventListener('submit', event => {event.preventDefault(); update();});
+    update();
+  </script>
+</body>
+</html>
