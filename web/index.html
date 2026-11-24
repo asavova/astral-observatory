@@ -33,7 +33,7 @@
     </form>
     <canvas id="sky" width="680" height="680" aria-label="Visible bright stars on a circular sky chart"></canvas>
     <p id="status" role="status"></p>
-    <p><small>Uses 5,070 HYG bright stars (magnitude ≤ 6). This is an approximate sky chart, not a telescope view.</small></p>
+    <p><small>Uses the local HYG star catalogue. This is an approximate sky chart, not a telescope view.</small></p>
   </main>
   <script>
     const timeInput = document.querySelector('#time');
@@ -58,8 +58,18 @@
         const distance = radius * (90 - star.alt)/90;
         const angle = star.az * Math.PI/180;
         const x = center + distance * Math.sin(angle), y = center - distance * Math.cos(angle);
-        const size = Math.max(0.65, 3 - star.mag * 0.35);
-        ctx.beginPath(); ctx.arc(x,y,size,0,Math.PI*2); ctx.fillStyle='#fbf4da'; ctx.fill();
+        // Apparent magnitude is logarithmic: 5 magnitudes = 100x in flux.
+        const flux = Math.pow(10, -0.4 * (star.mag + 1.44));
+        const size = Math.max(0.65, Math.min(4.5, 0.65 + 3.1 * Math.pow(flux, 0.4)));
+        const ci = star.ci;
+        const color = ci < 0 ? '#c8dbff' : ci < 0.5 ? '#eaf1ff' : ci < 1.1 ? '#fff0d1' : '#ffcf9f';
+        ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI*2);
+        ctx.globalAlpha = Math.max(0.38, Math.min(1, 0.55 + Math.sqrt(flux)));
+        ctx.fillStyle = color; ctx.fill(); ctx.globalAlpha = 1;
+        if (star.mag < 1.2 && !star.name.startsWith('HYG ')) {
+          ctx.font = '12px system-ui'; ctx.textAlign = 'left';
+          ctx.fillStyle = '#b7c9ee'; ctx.fillText(star.name, x + size + 4, y - 6);
+        }
       }
     }
     async function update() {
@@ -71,7 +81,7 @@
         if (!response.ok) throw new Error(await response.text());
         const data = await response.json();
         redraw(data.stars);
-        status.textContent = `${data.stars.length} of 5,070 catalogued stars are above the horizon.`;
+        status.textContent = `${data.stars.length} visible stars shown from ${data.total.toLocaleString()} catalogue entries (magnitude ≤ 6).`;
       } catch (error) { status.textContent = `Could not calculate sky: ${error.message}`; }
     }
     document.querySelector('#controls').addEventListener('submit', event => {event.preventDefault(); update();});
