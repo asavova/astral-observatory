@@ -31,13 +31,14 @@ jobs:
           test "$(git hash-object /tmp/hygdata_v41.csv)" = "ba2dec4eb0f6768914c7fc1051258100214ddf84"
       - name: Produce offline catalogue
         run: |
+          cp /tmp/hygdata_v41.csv data/hygdata_v41.csv
           python3 scripts/import_hyg.py /tmp/hygdata_v41.csv data/hyg-full-v41.tsv
           bash scripts/test.sh
       - name: Commit generated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/hyg-full-v41.tsv
+          git add data/hygdata_v41.csv data/hyg-full-v41.tsv
           if ! git diff --cached --quiet; then
             git commit -m "data: bundle full HYG v4.1 stars for offline use"
             git push
