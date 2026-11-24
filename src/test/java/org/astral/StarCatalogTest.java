@@ -29,6 +29,27 @@ public final class StarCatalogTest {
         } finally {
             Files.deleteIfExists(invalid);
         }
+        Path tsv = Files.createTempFile("hyg-catalog-test", ".tsv");
+        try {
+            Files.writeString(tsv, "id\tra_hours\tdec_deg\tmag\tci\tname\n"
+                    + "100\t6.7522\t-16.7161\t-1.46\t0.01\tSirius\n"
+                    + "101\t2.0\t42.0\t5.0\t1.2\t\n");
+            var full = StarCatalog.load(tsv);
+            if (full.size() != 2) throw new AssertionError("TSV row count");
+            near(-1.46, full.get(0).magnitude(), 1e-8);
+            near(1.2, full.get(1).colorIndex(), 1e-8);
+            if (!full.get(0).name().equals("Sirius")
+                    || !full.get(1).name().equals("HYG 101")) {
+                throw new AssertionError("TSV names");
+            }
+        } finally {
+            Files.deleteIfExists(tsv);
+        }
+        Path fullFile = Path.of("data/hyg-full-v41.tsv");
+        if (Files.exists(fullFile)) {
+            var full = StarCatalog.load(fullFile);
+            if (full.size() < 100_000) throw new AssertionError("Full HYG catalogue is incomplete");
+        }
         System.out.println("Catalogue loading and sky-coordinate checks passed.");
     }
     private static void near(double expected, double actual, double tolerance) {
