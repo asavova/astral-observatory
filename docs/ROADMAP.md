@@ -1,11 +1,12 @@
 # Next work
 
-The current app draws 12 sample stars using approximate J2000 positions. It is a starting point, not a finished planetarium.
+The prototype loads a full offline star catalogue and draws a basic sky chart. It is not yet a telescope simulator.
 
-- Load a full star catalogue from local files, with source and license recorded.
-- Add proper motion, precession and atmospheric refraction.
-- Compare calculated positions against published reference values.
-- Add telescope field of view, pointing and tracking.
-- Improve sky navigation, star search and performance for large catalogues.
+- Build a telescope state model with pointing, slewing and tracking modes.
+- Simulate Earth's rotation and test fixed vs tracked pointing.
+- Implement a telescope field of view and an eyepiece rendering mode.
+- Add efficient star lookup for narrow fields instead of scanning the full catalogue.
+- Add optical parameters and atmospheric effects.
+- Check pointing accuracy against published astronomical reference data.
 
-Keep the simulator usable offline. Third-party catalogue licenses need to be handled separately from the code license.
+Keep it usable offline. Catalogue data has a separate CC BY-SA license.
