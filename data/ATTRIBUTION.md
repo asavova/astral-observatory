@@ -11,4 +11,4 @@ The upstream Orrery project filtered HYG v4.1 to 5,070 stars of apparent magnitu
 
 The copy here is unchanged from that filtered JSON. The catalogue is stored locally for offline use. It is separate from the project's MIT-licensed application code; derivative catalogue data remains subject to CC BY-SA 4.0.
 
-The current Java prototype still loads `bright-stars-sample.csv`. Loading and rendering the larger HYG subset is future work.
+The Java server now loads this JSON file at startup. The browser plots its visible stars in a simple sky chart. This filtered dataset does not include star names or identifiers; the app assigns local display IDs. The B−V colour index is not yet used for rendering.
