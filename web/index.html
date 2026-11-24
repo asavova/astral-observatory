@@ -33,7 +33,7 @@
     </form>
     <canvas id="sky" width="680" height="680" aria-label="Visible bright stars on a circular sky chart"></canvas>
     <p id="status" role="status"></p>
-    <p><small>Only 12 sample stars are loaded. Positions are approximations, not precision telescope pointing.</small></p>
+    <p><small>Uses 5,070 HYG bright stars (magnitude ≤ 6). This is an approximate sky chart, not a telescope view.</small></p>
   </main>
   <script>
     const timeInput = document.querySelector('#time');
@@ -58,9 +58,8 @@
         const distance = radius * (90 - star.alt)/90;
         const angle = star.az * Math.PI/180;
         const x = center + distance * Math.sin(angle), y = center - distance * Math.cos(angle);
-        const size = Math.max(2, 5 - star.mag * 1.3);
+        const size = Math.max(0.65, 3 - star.mag * 0.35);
         ctx.beginPath(); ctx.arc(x,y,size,0,Math.PI*2); ctx.fillStyle='#fbf4da'; ctx.fill();
-        ctx.font='12px system-ui'; ctx.textAlign='left'; ctx.fillStyle='#d0dcf5'; ctx.fillText(star.name,x+9,y-7);
       }
     }
     async function update() {
@@ -72,7 +71,7 @@
         if (!response.ok) throw new Error(await response.text());
         const data = await response.json();
         redraw(data.stars);
-        status.textContent = `${data.stars.length} of 12 sample stars are above the horizon.`;
+        status.textContent = `${data.stars.length} of 5,070 catalogued stars are above the horizon.`;
       } catch (error) { status.textContent = `Could not calculate sky: ${error.message}`; }
     }
     document.querySelector('#controls').addEventListener('submit', event => {event.preventDefault(); update();});
