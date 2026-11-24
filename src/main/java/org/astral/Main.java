@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -22,7 +21,7 @@ public final class Main {
 
     public static void main(String[] args) throws Exception {
         Path project = Path.of("").toAbsolutePath();
-        List<Star> catalog = loadStars(project.resolve("data/bright-stars-sample.csv"));
+        List<Star> catalog = StarCatalog.load(project.resolve("data/hyg-bright-v41.json"));
         int port = Integer.parseInt(System.getenv().getOrDefault("ASTRAL_PORT", "8766"));
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 0);
         server.createContext("/api/stars", exchange -> {
@@ -59,19 +58,7 @@ public final class Main {
         });
         server.start();
         System.out.println("Astral Observatory starter running at http://127.0.0.1:" + port);
-        System.out.println("Loaded " + catalog.size() + " sample stars; Ctrl+C stops the server.");
-    }
-
-    private static List<Star> loadStars(Path file) throws IOException {
-        List<Star> result = new ArrayList<>();
-        for (String line : Files.readAllLines(file, StandardCharsets.UTF_8)) {
-            if (line.isBlank() || line.startsWith("#") || line.startsWith("name,")) continue;
-            String[] fields = line.split(",", -1);
-            if (fields.length != 4) throw new IOException("Invalid catalogue row: " + line);
-            result.add(new Star(fields[0], Double.parseDouble(fields[1]),
-                    Double.parseDouble(fields[2]), Double.parseDouble(fields[3])));
-        }
-        return List.copyOf(result);
+        System.out.println("Loaded " + catalog.size() + " HYG bright stars; Ctrl+C stops the server.");
     }
 
     private static Map<String, String> query(String rawQuery) {
