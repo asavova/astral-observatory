@@ -1,6 +1,6 @@
 # Astral Observatory
 
-Offline night-sky simulator. Early Java 21 prototype with a small set of real star coordinates.
+Offline night-sky prototype in Java 21.
 
 ## Run
 
@@ -8,7 +8,7 @@ Offline night-sky simulator. Early Java 21 prototype with a small set of real st
 bash scripts/run.sh
 ```
 
-Open http://127.0.0.1:8766. Requires Java 21.
+Open http://127.0.0.1:8766.
 
 ## Tests
 
@@ -16,4 +16,6 @@ Open http://127.0.0.1:8766. Requires Java 21.
 bash scripts/test.sh
 ```
 
-The current build converts star coordinates to local altitude and azimuth and draws a basic sky map. Positions are approximate; this isn't suitable for telescope pointing yet. A separate offline subset of 5,070 HYG stars is in `data/hyg-bright-v41.json` (see `data/ATTRIBUTION.md`). It isn't wired into the app yet. Full catalogue support and the telescope model are future work.
+Loads 5,070 HYG bright stars from `data/hyg-bright-v41.json` and plots their approximate positions above the horizon for an observer's location and time. Data credit and license: `data/ATTRIBUTION.md`.
+
+This is a basic sky chart. Telescope pointing, zoom and tracking are not implemented yet.
