@@ -1,5 +1,9 @@
 package org.astral;
 
-/** Equatorial catalogue position at the J2000 reference epoch. */
-public record Star(String name, double rightAscensionHours, double declinationDegrees, double magnitude) {
+/** Stellar position and apparent magnitude at the J2000 catalogue epoch. */
+public record Star(String name, double rightAscensionHours, double declinationDegrees,
+                   double magnitude, double colorIndex) {
+    public Star(String name, double rightAscensionHours, double declinationDegrees, double magnitude) {
+        this(name, rightAscensionHours, declinationDegrees, magnitude, 0.0);
+    }
 }
