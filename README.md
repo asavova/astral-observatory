@@ -1,6 +1,6 @@
 # Astral Observatory
 
-Offline night-sky prototype in Java 21.
+Offline Java 21 starter for a telescope simulator. For now, it draws a basic sky chart using real HYG star positions.
 
 ## Run
 
@@ -16,6 +16,6 @@ Open http://127.0.0.1:8766.
 bash scripts/test.sh
 ```
 
-Loads 5,070 HYG bright stars from `data/hyg-bright-v41.json` and plots their approximate positions above the horizon for an observer's location and time. Data credit and license: `data/ATTRIBUTION.md`.
+The local catalogue contains 119,625 stars (`data/hyg-full-v41.tsv`). Source and license details are in `data/ATTRIBUTION.md`.
 
-This is a basic sky chart. Telescope pointing, zoom and tracking are not implemented yet.
+Telescope pointing, zoom, tracking and optics are future work.
