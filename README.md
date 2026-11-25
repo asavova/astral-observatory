@@ -1,6 +1,6 @@
 # Astral Observatory
 
-Offline Java 21 starter for a telescope simulator. For now, it draws a basic sky chart using real HYG star positions.
+An offline Java 21 application for calculating and displaying star positions using the HYG v4.1 catalogue.
 
 ## Run
 
@@ -16,6 +16,6 @@ Open http://127.0.0.1:8766.
 bash scripts/test.sh
 ```
 
-The local catalogue contains 119,625 stars (`data/hyg-full-v41.tsv`). Source and license details are in `data/ATTRIBUTION.md`.
+The app reads the original `data/hygdata_v41.csv` catalogue directly (119,626 entries, including the Sun). The star loader retains identifiers, J2000 coordinates, proper motion, distance, radial velocity, magnitude and colour index where available. Missing measurements are kept as missing. The sky chart uses approximate coordinate calculations.
 
-Telescope pointing, zoom, tracking and optics are future work.
+Catalogue source and CC BY-SA 4.0 attribution: [data/ATTRIBUTION.md](data/ATTRIBUTION.md). Application code: MIT.
