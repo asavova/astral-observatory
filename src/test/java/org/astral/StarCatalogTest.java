@@ -45,6 +45,50 @@ public final class StarCatalogTest {
         } finally {
             Files.deleteIfExists(tsv);
         }
+        Path originalCsv = Files.createTempFile("hyg-v41-test", ".csv");
+        try {
+            Files.writeString(originalCsv,
+                    "id,hip,hd,hr,ra,dec,proper,mag,ci,pmra,pmdec,dist,rv\n"
+                    + "1,32349,48915,2491,6.7522,-16.7161,Sirius,-1.46,0.01,-546.01,-1223.07,2.637,-5.5\n"
+                    + "2,,,,3.0,20.0,\"Alpha, \"\"Test\"\"\",,,,,100000,\n"
+                    + "3,,,,0.0,0.0,Sun,-26.7,0.0,0,0,0,0\n");
+            var csvStars = StarCatalog.load(originalCsv);
+            if (csvStars.size() != 2) throw new AssertionError("CSV row count / Sun exclusion");
+            var first = csvStars.get(0);
+            if (!"1".equals(first.hygId()) || !"32349".equals(first.hipId())) {
+                throw new AssertionError("HYG and HIP identifiers");
+            }
+            near(-546.01, first.properMotionRaMasPerYear(), 1e-8);
+            near(-1223.07, first.properMotionDecMasPerYear(), 1e-8);
+            near(2.637, first.distanceParsecs(), 1e-8);
+            near(-5.5, first.radialVelocityKmPerSec(), 1e-8);
+            var second = csvStars.get(1);
+            if (!"Alpha, \"Test\"".equals(second.name())) {
+                throw new AssertionError("Quoted CSV name");
+            }
+            if (second.magnitude() != null || second.colorIndex() != null
+                    || second.properMotionRaMasPerYear() != null
+                    || second.distanceParsecs() != null || second.radialVelocityKmPerSec() != null) {
+                throw new AssertionError("Missing values should be null");
+            }
+        } finally {
+            Files.deleteIfExists(originalCsv);
+        }
+
+        Path original = Path.of("data/hygdata_v41.csv");
+        if (Files.isRegularFile(original)) {
+            var full = StarCatalog.loadBestAvailable(Path.of("data"));
+            if (full.size() != 119625) {
+                throw new AssertionError("Expected 119625 stars from original HYG CSV, got " + full.size());
+            }
+            if (full.stream().noneMatch(star -> star.properMotionRaMasPerYear() != null
+                    && star.properMotionDecMasPerYear() != null)) {
+                throw new AssertionError("Proper motion fields not loaded");
+            }
+            if (full.stream().noneMatch(star -> star.distanceParsecs() != null)) {
+                throw new AssertionError("Distance fields not loaded");
+            }
+        }
         Path fullFile = Path.of("data/hyg-full-v41.tsv");
         if (Files.exists(fullFile)) {
             var full = StarCatalog.load(fullFile);
