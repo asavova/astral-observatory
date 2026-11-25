@@ -38,15 +38,18 @@ public final class Main {
                         .append(catalog.size()).append(",\"stars\":[");
                 int count = 0;
                 for (Star star : catalog) {
-                    if (star.magnitude() > limit) continue;
+                    if (star.magnitude() == null || star.magnitude() > limit) continue;
                     SkyMath.Horizontal position = SkyMath.toHorizontal(star, lat, lon, time);
                     if (position.altitudeDegrees() <= 0) continue;
                     if (count++ > 0) json.append(',');
                     json.append("{\"name\":").append(quoted(star.name()));
                     json.append(String.format(Locale.ROOT,
-                            ",\"alt\":%.4f,\"az\":%.4f,\"mag\":%.2f,\"ci\":%.2f}",
+                            ",\"alt\":%.4f,\"az\":%.4f,\"mag\":%.2f,\"ci\":",
                             position.altitudeDegrees(), position.azimuthDegrees(),
-                            star.magnitude(), star.colorIndex()));
+                            star.magnitude()));
+                    if (star.colorIndex() == null) json.append("null");
+                    else json.append(String.format(Locale.ROOT, "%.2f", star.colorIndex()));
+                    json.append('}');
                 }
                 json.append("]}");
                 respond(exchange, 200, "application/json", json.toString().getBytes(StandardCharsets.UTF_8));
